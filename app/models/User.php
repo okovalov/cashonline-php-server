@@ -4,8 +4,9 @@ use Illuminate\Auth\UserTrait;
 use Illuminate\Auth\UserInterface;
 use Illuminate\Auth\Reminders\RemindableTrait;
 use Illuminate\Auth\Reminders\RemindableInterface;
+use Cartalyst\Sentry\Users\Eloquent\User as SentryUserModel;
 
-class User extends Eloquent implements UserInterface, RemindableInterface
+class User extends SentryUserModel implements UserInterface, RemindableInterface
 {
     use UserTrait, RemindableTrait;
 
@@ -27,5 +28,9 @@ class User extends Eloquent implements UserInterface, RemindableInterface
      * @var array
      */
     protected $hidden = array('password', 'remember_token');
+    
+    public function tokens() {
+        return $this->hasMany('Token');	
+    }
 
 }

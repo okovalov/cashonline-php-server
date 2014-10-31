@@ -2,6 +2,7 @@
 
 // Composer: "fzaninotto/faker": "v1.3.0"
 use Faker\Factory as Faker;
+// use Cartalyst\Sentry\Hashing\NativeHasher;
 
 class UsersTableSeeder extends Seeder {
 
@@ -11,11 +12,13 @@ class UsersTableSeeder extends Seeder {
 
 		foreach(range(1, 3) as $index)
 		{
-			User::create([
+			 Sentry::getUserProvider()->create([
                 'email'        => $faker->email(),
-                'name'         => $faker->name(),
-                'password'     => Hash::make('secret'),
-                'active'       => rand(0,1)
+                'first_name'         => $faker->firstName(),
+                'last_name'         => $faker->lastName(),
+                // 'password'     => Hash::make('secret'),
+                'password'     => 'secret',
+                'activated'       => rand(0,1)
 			]);
 		}
 	}
