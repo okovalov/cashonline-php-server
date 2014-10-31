@@ -10,6 +10,28 @@
 | application. Here you may also register your custom route filters.
 |
 */
+Route::filter('auth.token', function($route, $request)
+{
+    $payload = $request->header('X-Auth-Token');
+
+    $userModel = Sentry::getUserProvider()->createModel();
+
+    $user =  $userModel->where('api_token',$payload)->first();
+
+    if(!$payload || !$user) {
+
+        $response = Response::json([
+            'error' => true,
+            'message' => 'Not authenticated',
+            'code' => 401],
+            401
+        );
+
+        $response->header('Content-Type', 'application/json');
+    return $response;
+    }
+
+});
 
 App::before(function($request)
 {
