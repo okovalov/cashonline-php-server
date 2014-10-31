@@ -47,6 +47,18 @@
 
 // });  
 
+Route::get('account',[
+
+        'before' => 'auth.token',
+
+        function(){
+            $user = Sentry::getUser();
+            $token = $user->tokens()->where('client',BrowserDetect::toString())->first();
+            return Response::json(array('user' => $user->toArray(), 'token' => $token->toArray()));
+        }
+
+    ]);
+    
 Route::get('restaurants',[
 
         'before' => 'auth.token',
