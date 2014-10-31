@@ -6,8 +6,10 @@
     "require": {
         "laravel/framework": "4.2.*",
         "way/generators": "~2.0",
-        "fzaninotto/faker": "1.5.*@dev"
-
+        "fzaninotto/faker": "1.5.*@dev",
+        "cartalyst/sentry": "2.1.*",
+        "nesbot/Carbon": "*",
+        "hisorange/browser-detect": "1.*"
     },
     "autoload": {
         "classmap": [
