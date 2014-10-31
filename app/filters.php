@@ -1,4 +1,5 @@
 <?php
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -10,28 +11,95 @@
 | application. Here you may also register your custom route filters.
 |
 */
+
 Route::filter('auth.token', function($route, $request)
 {
-    $payload = $request->header('X-Auth-Token');
+	$authenticated = false;
 
-    $userModel = Sentry::getUserProvider()->createModel();
+	if($email = $request->getUser() && $password = $request->getPassword())
+	{
+		$credentials = array('email' => $request->getUser(), 'password' => $request->getPassword());
 
-    $user =  $userModel->where('api_token',$payload)->first();
+		$auth = App::make('auth');
 
-    if(!$payload || !$user) {
+		if(Auth::once($credentials))
+		{
+			$authenticated = true;
 
-        $response = Response::json([
-            'error' => true,
-            'message' => 'Not authenticated',
-            'code' => 401],
-            401
-        );
+			if(!Auth::user()->tokens()->where('client',BrowserDetect::toString())->first())
+			{
+				$token = [];
 
-        $response->header('Content-Type', 'application/json');
-    return $response;
-    }
+				$token['api_token'] = hash('sha256',Str::random(10),false);
+				$token['client'] = BrowserDetect::toString();
+				$token['expires_on'] = Carbon::now()->addMonth()->toDateTimeString();
+
+				Auth::user()->tokens()->save(new Token($token));
+			}
+
+		}
+	}
+
+	if($payload = $request->header('X-Auth-Token'))
+	{
+		$userModel = Sentry::getUserProvider()->createModel();
+
+		$token = Token::valid()->where('api_token',$payload)
+						->where('client',BrowserDetect::toString())
+						->first();
+
+		if($token)
+		{
+			Sentry::login($token->user);
+			$authenticated = true;
+		}
+
+	}
+
+	if($authenticated && !Sentry::check())
+	{
+		Sentry::login(Auth::user());
+	}
+
+	if(!$authenticated)
+	{
+		$response = Response::json([
+	            'error' => true,
+	            'message' => 'Not authenticated',
+	            'code' => 401],
+	            401
+	        );
+
+		$response->header('Content-Type', 'application/json');
+
+	    return $response;
+	}
+
 
 });
+
+// Route::filter('auth.token', function($route, $request)
+// {
+//     $payload = $request->header('X-Auth-Token');
+
+//     $userModel = Sentry::getUserProvider()->createModel();
+
+//     $user =  $userModel->where('api_token',$payload)->first();
+
+//     if(!$payload || !$user) {
+
+//         $response = Response::json([
+//             'error' => true,
+//             'message' => 'Not authenticated',
+//             'code' => 401],
+//             401
+//         );
+
+//         $response->header('Content-Type', 'application/json');
+//     return $response;
+//     }
+
+// });
 
 App::before(function($request)
 {

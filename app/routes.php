@@ -22,27 +22,44 @@
 //     return 'User Created';
 // });
 
-Route::post('login',function()
-{
-    try
-    {
-        $user  = Sentry::authenticate(Input::all(), false);
-        $token = hash('sha256',Str::random(10),false);
-        $user->api_token = $token;
-        $user->save();
+// Route::post('login',function()
+// {
+//     try
+//     {
+//         $user  = Sentry::authenticate(Input::all(), false);
+//         $token = hash('sha256',Str::random(10),false);
+//         $user->api_token = $token;
+//         $user->save();
 
-        return Response::json(array('token' => $token, 'user' => $user->toArray()));
-    }
-    catch(Exception $e)
-    {
-        App::abort(404,$e->getMessage());
-    }
-});
+//         return Response::json(array('token' => $token, 'user' => $user->toArray()));
+//     }
+//     catch(Exception $e)
+//     {
+//         App::abort(404,$e->getMessage());
+//     }
+// });
 
-Route::group(array('prefix' => 'api', 'before' => 'auth.token'), function() {
+// Route::group(array('prefix' => 'api', 'before' => 'auth.token'), function() {
 
-      Route::get('/', function() {
-        return "Protected resource";
-      });
+//       Route::get('/', function() {
+//         return "Protected resource";
+//       });
 
-});  
+// });  
+
+Route::get('restaurants',[
+
+        'before' => 'auth.token',
+
+        function(){
+            $restaurants = [];
+            for($i = 0; $i < 10; $i++)
+            {
+                $restaurant['name'] = 'rest_'.$i;
+                $restaurant['location'] = 'loc_'.$i;
+                $restaurants[] = $restaurant;
+            }
+            return Response::json($restaurants,200);
+        }
+
+    ]);
